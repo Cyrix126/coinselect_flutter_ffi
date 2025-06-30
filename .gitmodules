@@ -1,0 +1,3 @@
+[submodule "rust-coinselect"]
+	path = rust-coinselect
+	url = https://github.com/Cyrix126/rust-coinselect

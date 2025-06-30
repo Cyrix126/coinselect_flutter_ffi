@@ -1,3 +1,5 @@
-rust_input: crate::api
+rust_input: crate
 rust_root: rust-coinselect/
-dart_output: lib/src/rust
+dart_output: lib/src
+enable_lifetime: true
+web: false

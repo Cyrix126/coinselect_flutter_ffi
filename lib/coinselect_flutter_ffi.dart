@@ -1,4 +1,6 @@
 library;
 
-export 'src/rust/api/simple.dart';
-export 'src/rust/frb_generated.dart' show RustLib;
+export 'src/frb_generated.dart' show RustLib;
+export 'src/selectcoin.dart';
+export 'src/types.dart';
+export 'src/utils.dart';
