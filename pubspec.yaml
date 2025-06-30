@@ -1,6 +1,6 @@
 name: coinselect_flutter_ffi
-description: "A new Flutter FFI plugin project."
-version: 0.0.1
+description: "A flutter plugin making use of rust-coinselect"
+version: 0.1.0
 homepage:
 
 environment:
