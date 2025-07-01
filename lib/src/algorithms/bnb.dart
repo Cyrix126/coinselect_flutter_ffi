@@ -8,10 +8,10 @@ import '../types.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `bnb`
-// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `MatchParameters`
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `BnbContext`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `fmt`
 
-/// Perform Coinselection via Branch And Bound algorithm.
+/// Perform Coinselection via Branch And Bound algorithm, only returns a solution if least waste within target's `match_range` is found.
 Future<SelectionOutput> selectCoinBnb({
   required List<OutputGroup> inputs,
   required CoinSelectionOpt options,
