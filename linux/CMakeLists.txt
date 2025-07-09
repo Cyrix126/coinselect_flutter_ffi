@@ -8,6 +8,7 @@ set(PROJECT_NAME "coinselect_flutter_ffi")
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 include("../cargokit/cmake/cargokit.cmake")
+add_git_submodule()
 apply_cargokit(${PROJECT_NAME} ../rust-coinselect coinselect_flutter_ffi "")
 
 # List of absolute paths to libraries that should be bundled with the plugin.

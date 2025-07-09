@@ -1,5 +1,13 @@
 SET(cargokit_cmake_root "${CMAKE_CURRENT_LIST_DIR}/..")
 
+find_package(Git REQUIRED)
+
+function(add_git_submodule)
+  execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+    COMMAND_ERROR_IS_FATAL ANY)
+endfunction(add_git_submodule)
+
 # Workaround for https://github.com/dart-lang/pub/issues/4010
 get_filename_component(cargokit_cmake_root "${cargokit_cmake_root}" REALPATH)
 
