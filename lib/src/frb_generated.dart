@@ -70,7 +70,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.10.0';
 
   @override
-  int get rustContentHash => -1231149253;
+  int get rustContentHash => 582219135;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -95,7 +95,7 @@ abstract class RustLibApi extends BaseApi {
     required double rate,
   });
 
-  Future<BigInt> crateUtilsCalculateWaste({
+  Future<double> crateUtilsCalculateWaste({
     required CoinSelectionOpt options,
     required BigInt accumulatedValue,
     required BigInt accumulatedWeight,
@@ -141,6 +141,8 @@ abstract class RustLibApi extends BaseApi {
     required List<OutputGroup> inputs,
     required CoinSelectionOpt options,
   });
+
+  Future<BigInt> crateUtilsSum({required BigInt a, required BigInt b});
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -254,7 +256,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<BigInt> crateUtilsCalculateWaste({
+  Future<double> crateUtilsCalculateWaste({
     required CoinSelectionOpt options,
     required BigInt accumulatedValue,
     required BigInt accumulatedWeight,
@@ -276,7 +278,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_u_64,
+          decodeSuccessData: sse_decode_f_32,
           decodeErrorData: null,
         ),
         constMeta: kCrateUtilsCalculateWasteConstMeta,
@@ -576,6 +578,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         argNames: ["inputs", "options"],
       );
 
+  @override
+  Future<BigInt> crateUtilsSum({required BigInt a, required BigInt b}) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_u_64(a, serializer);
+          sse_encode_u_64(b, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 13,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_u_64,
+          decodeErrorData: sse_decode_AnyhowException,
+        ),
+        constMeta: kCrateUtilsSumConstMeta,
+        argValues: [a, b],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateUtilsSumConstMeta =>
+      const TaskConstMeta(debugName: "sum", argNames: ["a", "b"]);
+
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -779,7 +810,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final arr = raw as List<dynamic>;
     if (arr.length != 1)
       throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
-    return WasteMetric(field0: dco_decode_u_64(arr[0]));
+    return WasteMetric(field0: dco_decode_f_32(arr[0]));
   }
 
   @protected
@@ -1017,7 +1048,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   WasteMetric sse_decode_waste_metric(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    var var_field0 = sse_decode_u_64(deserializer);
+    var var_field0 = sse_decode_f_32(deserializer);
     return WasteMetric(field0: var_field0);
   }
 
@@ -1256,7 +1287,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_waste_metric(WasteMetric self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_u_64(self.field0, serializer);
+    sse_encode_f_32(self.field0, serializer);
   }
 
   @protected

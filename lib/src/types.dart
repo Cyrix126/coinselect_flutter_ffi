@@ -167,8 +167,10 @@ class OutputGroup {
 enum SelectionError {
   insufficientFunds,
   noSolutionFound,
+  nonPositiveTarget,
   nonPositiveFeeRate,
   abnormallyHighFeeRate,
+  abnormallyHighAmount,
 }
 
 /// The result of selection algorithm.
@@ -200,7 +202,7 @@ class SelectionOutput {
 /// In low fee rate environments, selecting more inputs reduces overall fees.
 /// It compares various selection algorithms to find the most optimized solution, represented by the lowest [WasteMetric] value.
 class WasteMetric {
-  final BigInt field0;
+  final double field0;
 
   const WasteMetric({required this.field0});
 

@@ -9,7 +9,7 @@ import 'types.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `fmt`
 
-Future<BigInt> calculateWaste({
+Future<double> calculateWaste({
   required CoinSelectionOpt options,
   required BigInt accumulatedValue,
   required BigInt accumulatedWeight,
@@ -32,6 +32,10 @@ Future<BigInt> calculateAccumulatedWeight({
   smallerCoins: smallerCoins,
   selectedInputs: selectedInputs,
 );
+
+/// sugar to return a SelectionError when overflowing
+Future<BigInt> sum({required BigInt a, required BigInt b}) =>
+    RustLib.instance.api.crateUtilsSum(a: a, b: b);
 
 Future<BigInt> calculateFee({required BigInt weight, required double rate}) =>
     RustLib.instance.api.crateUtilsCalculateFee(weight: weight, rate: rate);
