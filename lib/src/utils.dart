@@ -37,15 +37,6 @@ Future<BigInt> calculateAccumulatedWeight({
 Future<BigInt> calculateFee({required BigInt weight, required double rate}) =>
     RustLib.instance.api.crateUtilsCalculateFee(weight: weight, rate: rate);
 
-/// Returns the effective value of the `OutputGroup`, which is the actual value minus the estimated fee.
-Future<BigInt> effectiveValue({
-  required OutputGroup output,
-  required double feerate,
-}) => RustLib.instance.api.crateUtilsEffectiveValue(
-  output: output,
-  feerate: feerate,
-);
-
 /// Returns the weights of data in transaction other than the list of inputs that would be selected.
 Future<BigInt> calculateBaseWeightBtc({required BigInt outputWeight}) => RustLib
     .instance

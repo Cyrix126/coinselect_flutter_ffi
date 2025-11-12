@@ -6,7 +6,8 @@
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `cmp`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `partial_cmp`
+// These functions are ignored because they are not marked as `pub`: `sort_by_effective_value`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `cmp`, `eq`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `partial_cmp`
 
 /// Options required to compute fees and waste metric.
 class CoinSelectionOpt {
@@ -24,9 +25,9 @@ class CoinSelectionOpt {
   /// Lowest possible transaction fee required to get a transaction included in a block
   final BigInt minAbsoluteFee;
 
-  /// Weights of data in transaction other than the list of inputs that would be selected.
+  /// Weights of data in transaction other than the list of inputs that would be selected and possible change output.
   ///
-  /// This includes weight of the header, total weight out outputs, weight of fields used
+  /// This includes weight of the header, total weight of outputs excluding the possible change output, weight of fields used
   /// to represent number number of inputs and number outputs, witness etc.,
   final BigInt baseWeight;
 
@@ -50,6 +51,9 @@ class CoinSelectionOpt {
   /// Strategy to use the excess value other than fee and target
   final ExcessStrategy excessStrategy;
 
+  /// Coin Grinder option
+  final BigInt maxSelectionWeight;
+
   const CoinSelectionOpt({
     required this.targetValue,
     required this.targetFeerate,
@@ -62,7 +66,22 @@ class CoinSelectionOpt {
     required this.avgOutputWeight,
     required this.minChangeValue,
     required this.excessStrategy,
+    required this.maxSelectionWeight,
   });
+
+  /// Will give the change value from an effective value, which can be calculated from the sum of selected inputs
+  /// Return None if there is no change
+  /// Return an error if values are abnormall
+  Future<BigInt?> changeLeftFromEffectiveValue({
+    required BigInt effectiveValue,
+  }) => RustLib.instance.api
+      .crateTypesCoinSelectionOptChangeLeftFromEffectiveValue(
+        that: this,
+        effectiveValue: effectiveValue,
+      );
+
+  static Future<CoinSelectionOpt> default_() =>
+      RustLib.instance.api.crateTypesCoinSelectionOptDefault();
 
   @override
   int get hashCode =>
@@ -76,7 +95,8 @@ class CoinSelectionOpt {
       avgInputWeight.hashCode ^
       avgOutputWeight.hashCode ^
       minChangeValue.hashCode ^
-      excessStrategy.hashCode;
+      excessStrategy.hashCode ^
+      maxSelectionWeight.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -93,7 +113,8 @@ class CoinSelectionOpt {
           avgInputWeight == other.avgInputWeight &&
           avgOutputWeight == other.avgOutputWeight &&
           minChangeValue == other.minChangeValue &&
-          excessStrategy == other.excessStrategy;
+          excessStrategy == other.excessStrategy &&
+          maxSelectionWeight == other.maxSelectionWeight;
 }
 
 /// Strategy to decide what to do with the excess amount.
@@ -110,7 +131,10 @@ enum ExcessStrategy {
   /// Creates a change output with the excess amount. This preserves privacy and
   /// allows reuse of the excess amount in future transactions, but increases
   /// transaction size and creates dust UTXOs if the amount is too small.
-  toChange,
+  toChange;
+
+  static Future<ExcessStrategy> default_() =>
+      RustLib.instance.api.crateTypesExcessStrategyDefault();
 }
 
 /// Represents an input candidate for Coinselection, either as a single UTXO or a group of UTXOs.
@@ -145,6 +169,25 @@ class OutputGroup {
     this.creationSequence,
   });
 
+  static Future<OutputGroup> default_() =>
+      RustLib.instance.api.crateTypesOutputGroupDefault();
+
+  /// Returns the effective value of the `OutputGroup`, which is the actual value minus the estimated fee.
+  Future<BigInt> effectiveValue({required double feerate}) => RustLib
+      .instance
+      .api
+      .crateTypesOutputGroupEffectiveValue(that: this, feerate: feerate);
+
+  // HINT: Make it `#[frb(sync)]` to let it become the default constructor of Dart class.
+  /// Simple helper that ignore fewer used fields
+  static Future<OutputGroup> newInstance({
+    required BigInt value,
+    required BigInt weight,
+  }) => RustLib.instance.api.crateTypesOutputGroupNew(
+    value: value,
+    weight: weight,
+  );
+
   @override
   int get hashCode =>
       value.hashCode ^
@@ -168,9 +211,17 @@ enum SelectionError {
   insufficientFunds,
   noSolutionFound,
   nonPositiveTarget,
-  nonPositiveFeeRate,
+  negativeFeeRate,
   abnormallyHighFeeRate,
   abnormallyHighAmount,
+
+  /// The value of change_cost option given is lower than the added fee to
+  /// create a new output with avg_output_weight option
+  lowerThanFeeChangeCost,
+  iterationLimitReached,
+
+  /// BnB possible error
+  maxWeightExceeded,
 }
 
 /// The result of selection algorithm.
@@ -181,10 +232,18 @@ class SelectionOutput {
   /// The waste amount, for the above inputs.
   final WasteMetric waste;
 
-  const SelectionOutput({required this.selectedInputs, required this.waste});
+  /// number of iteration executed
+  final int iterations;
+
+  const SelectionOutput({
+    required this.selectedInputs,
+    required this.waste,
+    required this.iterations,
+  });
 
   @override
-  int get hashCode => selectedInputs.hashCode ^ waste.hashCode;
+  int get hashCode =>
+      selectedInputs.hashCode ^ waste.hashCode ^ iterations.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -192,7 +251,8 @@ class SelectionOutput {
       other is SelectionOutput &&
           runtimeType == other.runtimeType &&
           selectedInputs == other.selectedInputs &&
-          waste == other.waste;
+          waste == other.waste &&
+          iterations == other.iterations;
 }
 
 /// Measures the efficiency of input selection in satoshis, helping evaluate algorithms based on current and long-term fee rates

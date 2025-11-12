@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'algorithms/bnb.dart';
+import 'algorithms/coin_grinder.dart';
 import 'algorithms/fifo.dart';
 import 'algorithms/knapsack.dart';
 import 'algorithms/leastchange.dart';
@@ -74,7 +75,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1500363765;
+  int get rustContentHash => -825278235;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -117,14 +118,35 @@ abstract class RustLibApi extends BaseApi {
     required BigInt estimatedFee,
   });
 
+  Future<SelectionOutput> crateAlgorithmsCoinGrinderCoinGrinder({
+    required List<OutputGroup> weightedUtxos,
+    required CoinSelectionOpt options,
+  });
+
+  Future<BigInt?> crateTypesCoinSelectionOptChangeLeftFromEffectiveValue({
+    required CoinSelectionOpt that,
+    required BigInt effectiveValue,
+  });
+
+  Future<CoinSelectionOpt> crateTypesCoinSelectionOptDefault();
+
   Stream<LogEntry> crateLoggerCreateLogStream();
 
-  Future<BigInt> crateUtilsEffectiveValue({
-    required OutputGroup output,
+  Future<ExcessStrategy> crateTypesExcessStrategyDefault();
+
+  Future<void> crateLoggerInitLogger();
+
+  Future<OutputGroup> crateTypesOutputGroupDefault();
+
+  Future<BigInt> crateTypesOutputGroupEffectiveValue({
+    required OutputGroup that,
     required double feerate,
   });
 
-  Future<void> crateLoggerInitLogger();
+  Future<OutputGroup> crateTypesOutputGroupNew({
+    required BigInt value,
+    required BigInt weight,
+  });
 
   Future<SelectionOutput> crateSelectcoinSelectCoin({
     required List<OutputGroup> inputs,
@@ -418,7 +440,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_f_32,
-          decodeErrorData: null,
+          decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateUtilsCalculateWasteConstMeta,
         argValues: [options, accumulatedValue, accumulatedWeight, estimatedFee],
@@ -438,6 +460,108 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  Future<SelectionOutput> crateAlgorithmsCoinGrinderCoinGrinder({
+    required List<OutputGroup> weightedUtxos,
+    required CoinSelectionOpt options,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_output_group(weightedUtxos, serializer);
+          sse_encode_box_autoadd_coin_selection_opt(options, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 8,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_selection_output,
+          decodeErrorData: sse_decode_selection_error,
+        ),
+        constMeta: kCrateAlgorithmsCoinGrinderCoinGrinderConstMeta,
+        argValues: [weightedUtxos, options],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateAlgorithmsCoinGrinderCoinGrinderConstMeta =>
+      const TaskConstMeta(
+        debugName: "coin_grinder",
+        argNames: ["weightedUtxos", "options"],
+      );
+
+  @override
+  Future<BigInt?> crateTypesCoinSelectionOptChangeLeftFromEffectiveValue({
+    required CoinSelectionOpt that,
+    required BigInt effectiveValue,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_coin_selection_opt(that, serializer);
+          sse_encode_u_64(effectiveValue, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 9,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_u_64,
+          decodeErrorData: sse_decode_selection_error,
+        ),
+        constMeta:
+            kCrateTypesCoinSelectionOptChangeLeftFromEffectiveValueConstMeta,
+        argValues: [that, effectiveValue],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta
+  get kCrateTypesCoinSelectionOptChangeLeftFromEffectiveValueConstMeta =>
+      const TaskConstMeta(
+        debugName: "coin_selection_opt_change_left_from_effective_value",
+        argNames: ["that", "effectiveValue"],
+      );
+
+  @override
+  Future<CoinSelectionOpt> crateTypesCoinSelectionOptDefault() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 10,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_coin_selection_opt,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateTypesCoinSelectionOptDefaultConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateTypesCoinSelectionOptDefaultConstMeta =>
+      const TaskConstMeta(
+        debugName: "coin_selection_opt_default",
+        argNames: [],
+      );
+
+  @override
   Stream<LogEntry> crateLoggerCreateLogStream() {
     final s = RustStreamSink<LogEntry>();
     unawaited(
@@ -449,7 +573,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 8,
+              funcId: 11,
               port: port_,
             );
           },
@@ -470,38 +594,31 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "create_log_stream", argNames: ["s"]);
 
   @override
-  Future<BigInt> crateUtilsEffectiveValue({
-    required OutputGroup output,
-    required double feerate,
-  }) {
+  Future<ExcessStrategy> crateTypesExcessStrategyDefault() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_box_autoadd_output_group(output, serializer);
-          sse_encode_f_32(feerate, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 12,
             port: port_,
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_u_64,
-          decodeErrorData: sse_decode_AnyhowException,
+          decodeSuccessData: sse_decode_excess_strategy,
+          decodeErrorData: null,
         ),
-        constMeta: kCrateUtilsEffectiveValueConstMeta,
-        argValues: [output, feerate],
+        constMeta: kCrateTypesExcessStrategyDefaultConstMeta,
+        argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateUtilsEffectiveValueConstMeta => const TaskConstMeta(
-    debugName: "effective_value",
-    argNames: ["output", "feerate"],
-  );
+  TaskConstMeta get kCrateTypesExcessStrategyDefaultConstMeta =>
+      const TaskConstMeta(debugName: "excess_strategy_default", argNames: []);
 
   @override
   Future<void> crateLoggerInitLogger() {
@@ -512,7 +629,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 13,
             port: port_,
           );
         },
@@ -531,6 +648,102 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "init_logger", argNames: []);
 
   @override
+  Future<OutputGroup> crateTypesOutputGroupDefault() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 14,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_output_group,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateTypesOutputGroupDefaultConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateTypesOutputGroupDefaultConstMeta =>
+      const TaskConstMeta(debugName: "output_group_default", argNames: []);
+
+  @override
+  Future<BigInt> crateTypesOutputGroupEffectiveValue({
+    required OutputGroup that,
+    required double feerate,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_output_group(that, serializer);
+          sse_encode_f_32(feerate, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 15,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_u_64,
+          decodeErrorData: sse_decode_selection_error,
+        ),
+        constMeta: kCrateTypesOutputGroupEffectiveValueConstMeta,
+        argValues: [that, feerate],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateTypesOutputGroupEffectiveValueConstMeta =>
+      const TaskConstMeta(
+        debugName: "output_group_effective_value",
+        argNames: ["that", "feerate"],
+      );
+
+  @override
+  Future<OutputGroup> crateTypesOutputGroupNew({
+    required BigInt value,
+    required BigInt weight,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_u_64(value, serializer);
+          sse_encode_u_64(weight, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 16,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_output_group,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateTypesOutputGroupNewConstMeta,
+        argValues: [value, weight],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateTypesOutputGroupNewConstMeta => const TaskConstMeta(
+    debugName: "output_group_new",
+    argNames: ["value", "weight"],
+  );
+
+  @override
   Future<SelectionOutput> crateSelectcoinSelectCoin({
     required List<OutputGroup> inputs,
     required CoinSelectionOpt options,
@@ -544,7 +757,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 17,
             port: port_,
           );
         },
@@ -578,7 +791,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 18,
             port: port_,
           );
         },
@@ -613,7 +826,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 19,
             port: port_,
           );
         },
@@ -649,7 +862,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 20,
             port: port_,
           );
         },
@@ -684,7 +897,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 21,
             port: port_,
           );
         },
@@ -719,7 +932,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 16,
+            funcId: 22,
             port: port_,
           );
         },
@@ -755,7 +968,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 23,
             port: port_,
           );
         },
@@ -785,7 +998,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 24,
             port: port_,
           );
         },
@@ -922,11 +1135,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt dco_decode_box_autoadd_u_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_u_64(raw);
+  }
+
+  @protected
   CoinSelectionOpt dco_decode_coin_selection_opt(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 11)
-      throw Exception('unexpected arr length: expect 11 but see ${arr.length}');
+    if (arr.length != 12)
+      throw Exception('unexpected arr length: expect 12 but see ${arr.length}');
     return CoinSelectionOpt(
       targetValue: dco_decode_u_64(arr[0]),
       targetFeerate: dco_decode_f_32(arr[1]),
@@ -939,6 +1158,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       avgOutputWeight: dco_decode_u_64(arr[8]),
       minChangeValue: dco_decode_u_64(arr[9]),
       excessStrategy: dco_decode_excess_strategy(arr[10]),
+      maxSelectionWeight: dco_decode_u_64(arr[11]),
     );
   }
 
@@ -1020,6 +1240,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt? dco_decode_opt_box_autoadd_u_64(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_u_64(raw);
+  }
+
+  @protected
   OutputGroup dco_decode_output_group(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1057,11 +1283,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   SelectionOutput dco_decode_selection_output(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2)
-      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3)
+      throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return SelectionOutput(
       selectedInputs: dco_decode_list_prim_usize_strict(arr[0]),
       waste: dco_decode_waste_metric(arr[1]),
+      iterations: dco_decode_u_32(arr[2]),
     );
   }
 
@@ -1234,6 +1461,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_u_64(deserializer));
+  }
+
+  @protected
   CoinSelectionOpt sse_decode_coin_selection_opt(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_targetValue = sse_decode_u_64(deserializer);
@@ -1247,6 +1480,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_avgOutputWeight = sse_decode_u_64(deserializer);
     var var_minChangeValue = sse_decode_u_64(deserializer);
     var var_excessStrategy = sse_decode_excess_strategy(deserializer);
+    var var_maxSelectionWeight = sse_decode_u_64(deserializer);
     return CoinSelectionOpt(
       targetValue: var_targetValue,
       targetFeerate: var_targetFeerate,
@@ -1259,6 +1493,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       avgOutputWeight: var_avgOutputWeight,
       minChangeValue: var_minChangeValue,
       excessStrategy: var_excessStrategy,
+      maxSelectionWeight: var_maxSelectionWeight,
     );
   }
 
@@ -1360,6 +1595,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  BigInt? sse_decode_opt_box_autoadd_u_64(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_u_64(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   OutputGroup sse_decode_output_group(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_value = sse_decode_u_64(deserializer);
@@ -1397,9 +1643,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_selectedInputs = sse_decode_list_prim_usize_strict(deserializer);
     var var_waste = sse_decode_waste_metric(deserializer);
+    var var_iterations = sse_decode_u_32(deserializer);
     return SelectionOutput(
       selectedInputs: var_selectedInputs,
       waste: var_waste,
+      iterations: var_iterations,
     );
   }
 
@@ -1595,6 +1843,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_64(self, serializer);
+  }
+
+  @protected
   void sse_encode_coin_selection_opt(
     CoinSelectionOpt self,
     SseSerializer serializer,
@@ -1611,6 +1865,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_u_64(self.avgOutputWeight, serializer);
     sse_encode_u_64(self.minChangeValue, serializer);
     sse_encode_excess_strategy(self.excessStrategy, serializer);
+    sse_encode_u_64(self.maxSelectionWeight, serializer);
   }
 
   @protected
@@ -1713,6 +1968,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_u_64(BigInt? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_u_64(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_output_group(OutputGroup self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_u_64(self.value, serializer);
@@ -1749,6 +2014,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_list_prim_usize_strict(self.selectedInputs, serializer);
     sse_encode_waste_metric(self.waste, serializer);
+    sse_encode_u_32(self.iterations, serializer);
   }
 
   @protected

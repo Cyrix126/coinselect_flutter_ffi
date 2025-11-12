@@ -8,7 +8,7 @@ import '../types.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 /// Performs coin selection using the First-In-First-Out (FIFO) algorithm.
-///
+/// The selection can produce a change output
 /// Returns `NoSolutionFound` if no solution is found.
 Future<SelectionOutput> selectCoinFifo({
   required List<OutputGroup> inputs,
